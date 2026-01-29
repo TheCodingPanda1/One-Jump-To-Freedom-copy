@@ -53,6 +53,7 @@ var ua = new Block("/unchecked-airjump.png", "addairjump");
 var ca = new Block("/checked-airjump.png");
 var s = new Block("/star.png", "addstar");
 var cs = new Block("/checked-star.png");
+
 var levels = [
     [
         2,
