@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Platformer - 10 Levels</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Prevent scrolling with arrow keys */
+        }
+        canvas {
+            border: 4px solid #444;
+            background-color: #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            pointer-events: none; /* Let clicks pass through to canvas if needed */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <h2 id="level-display">Level 1 / 10</h2>
+        <p>Use Arrow Keys to Move • Space to Jump</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+    // --- Configuration ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const levelDisplay = document.getElementById('level-display');
+
+    // Physics Constants
+    const GRAVITY = 0.6;
+    const FRICTION = 0.8; // Slide effect
+    const JUMP_FORCE = -12;
+    const SPEED = 5;
+
+    // Game State
+    let currentLevel = 1;
+    const TOTAL_LEVELS = 10;
+    let gameState = "playing"; // playing, won
+
+    // --- Input Handling ---
+    const keys = {
+        right: false,
+        left: false,
+        up: false
+    };
+
+    document.addEventListener('keydown', (e) => {
+        if(e.code === "ArrowRight") keys.right = true;
+        if(e.code === "ArrowLeft") keys.left = true;
+        if(e.code === "Space" || e.code === "ArrowUp") {
+            keys.up = true;
+            // Prevent scrolling
+            e.preventDefault();
+        }
+        // Restart if won
+        if(gameState === "won" && e.code === "Space") {
+            resetGame();
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if(e.code === "ArrowRight") keys.right = false;
+        if(e.code === "ArrowLeft") keys.left = false;
+        if(e.code === "Space" || e.code === "ArrowUp") keys.up = false;
+    });
+
+    // --- Classes ---
+
+    class Player {
+        constructor() {
+            this.width = 30;
+            this.height = 30;
+            this.color = "#3498db"; // Blue
+            this.resetPosition();
+        }
+
+        resetPosition() {
+            this.x = 50;
+            this.y = canvas.height - 150;
+            this.velX = 0;
+            this.velY = 0;
+            this.grounded = false;
+        }
+
+        update(platforms) {
+            // 1. Apply Input to Velocity
+            if (keys.right) this.velX = SPEED;
+            else if (keys.left) this.velX = -SPEED;
+            else this.velX *= FRICTION; // Slide to stop
+
+            // 2. Apply Gravity
+            this.velY += GRAVITY;
+
+            // 3. Jump
+            if (keys.up && this.grounded) {
+                this.velY = JUMP_FORCE;
+                this.grounded = false;
+            }
+
+            // 4. Move X and Check Collision
+            this.x += this.velX;
+            this.checkCollision(platforms, 'x');
+
+            // 5. Move Y and Check Collision
+            this.y += this.velY;
+            this.grounded = false; // Assume in air until collision proves otherwise
+            this.checkCollision(platforms, 'y');
+
+            // 6. World Bounds (Death)
+            if (this.y > canvas.height) {
+                this.resetPosition(); // Die and respawn
+            }
+        }
+
+        checkCollision(platforms, axis) {
+            for (let p of platforms) {
+                if (this.x < p.x + p.w &&
+                    this.x + this.width > p.x &&
+                    this.y < p.y + p.h &&
+                    this.y + this.height > p.y) {
+                    
+                    if (axis === 'x') {
+                        // Horizontal Collision
+                        if (this.velX > 0) this.x = p.x - this.width;
+                        if (this.velX < 0) this.x = p.x + p.w;
+                        this.velX = 0;
+                    } else {
+                        // Vertical Collision
+                        if (this.velY > 0) { // Falling
+                            this.y = p.y - this.height;
+                            this.grounded = true;
+                            this.velY = 0;
+                        } else if (this.velY < 0) { // Hitting head
+                            this.y = p.y + p.h;
+                            this.velY = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    class Goal {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.w = 40;
+            this.h = 40;
+            this.color = "#2ecc71"; // Green
+        }
+
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+            // Draw a simple border
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.w, this.h);
+        }
+    }
+
+    // --- Level Generation ---
+
+    let player = new Player();
+    let platforms = [];
+    let goal = null;
+
+    function generateLevel(levelNum) {
+        platforms = [];
+        
+        // 1. Starting Ground
+        platforms.push({ x: 0, y: canvas.height - 50, w: 200, h: 50 });
+
+        // 2. Generate random platforms
+        // Difficulty scales with levelNum (gaps get wider, platforms smaller)
+        let xCursor = 200;
+        let gapMin = 60 + (levelNum * 5);
+        let gapMax = 120 + (levelNum * 10);
+        
+        while(xCursor < canvas.width - 150) {
+            let gap = Math.floor(Math.random() * (gapMax - gapMin + 1)) + gapMin;
+            let width = Math.floor(Math.random() * (150 - 50 + 1)) + 50;
+            // Shrink platforms on higher levels
+            width = Math.max(40, width - (levelNum * 5)); 
+            
+            let height = Math.floor(Math.random() * (canvas.height - 200)) + 150;
+
+            platforms.push({
+                x: xCursor + gap,
+                y: height,
+                w: width,
+                h: 20
+            });
+
+            xCursor += gap + width;
+        }
+
+        // 3. Goal Platform
+        let finalX = xCursor + 50;
+        platforms.push({ x: finalX, y: canvas.height - 150, w: 100, h: 20 });
+        goal = new Goal(finalX + 30, canvas.height - 190);
+    }
+
+    function checkWin() {
+        // Simple AABB check between Player and Goal
+        if (player.x < goal.x + goal.w &&
+            player.x + player.width > goal.x &&
+            player.y < goal.y + goal.h &&
+            player.y + player.height > goal.y) {
+            
+            // Touched Goal
+            if (currentLevel < TOTAL_LEVELS) {
+                currentLevel++;
+                levelDisplay.textContent = `Level ${currentLevel} / ${TOTAL_LEVELS}`;
+                player.resetPosition();
+                generateLevel(currentLevel);
+            } else {
+                gameState = "won";
+            }
+        }
+    }
+
+    function resetGame() {
+        currentLevel = 1;
+        gameState = "playing";
+        levelDisplay.textContent = `Level 1 / ${TOTAL_LEVELS}`;
+        player.resetPosition();
+        generateLevel(currentLevel);
+    }
+
+    // --- Main Game Loop ---
+
+    function loop() {
+        // 1. Clear Screen
+        ctx.fillStyle = "#333";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (gameState === "playing") {
+            // 2. Update Physics
+            player.update(platforms);
+            checkWin();
+
+            // 3. Draw Everything
+            // Draw Platforms
+            ctx.fillStyle = "#95a5a6"; // Grey
+            for(let p of platforms) {
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+            }
+
+            // Draw Goal
+            goal.draw();
+
+            // Draw Player
+            player.draw();
+
+        } else if (gameState === "won") {
+            // Win Screen
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = "#2ecc71";
+            ctx.font = "50px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("YOU WIN!", canvas.width/2, canvas.height/2);
+            
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.fillText("Press Space to Restart", canvas.width/2, canvas.height/2 + 50);
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    // Start
+    generateLevel(1);
+    loop();
+
+</script>
+</body>
+</html>

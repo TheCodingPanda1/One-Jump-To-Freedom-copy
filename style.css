@@ -1,0 +1,129 @@
+.button {
+    appearance: none;
+    width: 200px;
+    height: 75px;
+    background: brown;
+    border: 2px solid black;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    margin-top: 100px;
+    border-radius: 20px;
+}
+.button:nth-of-type(1){
+    top: 150px;
+}
+.button:nth-of-type(2){
+    top: 300px;
+}
+.button:hover {
+    background: rgb(255, 150, 100);
+    font-size: 45px;
+}
+.button:active {
+    scale: 0.9;
+}
+h1 {
+    font-size: 50px;
+}
+body {
+    background: #add8e6;
+    overflow: hidden;
+}
+p {
+    font-size: 30px;
+}
+#jumps {
+    position: fixed;
+    right: calc(50% - 100px);
+    font-size: 30px;
+    line-height: 20px;
+    color: red;
+    bottom: calc(50% + 35px);
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 25px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#jumps svg {
+    width: 20px;
+    height: 20px;
+    display: inline;
+}
+#air-jumps {
+    position: fixed;
+    right: calc(50% - 100px);
+    font-size: 30px;
+    line-height: 20px;
+    color: blue;
+    bottom: calc(50% + 65px);
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 30px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#air-jumps svg {
+    display: inline;
+    width: 20px;
+    height: 20px;
+}
+#stars {
+    position: fixed;
+    right: calc(50% - 100px);
+    font-size: 30px;
+    line-height: 20px;
+    color: yellow;
+    bottom: calc(50% + 95px);
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 30px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#player {
+    width: 50px;
+    height: 50px;
+    background: url(player.png);
+    position: absolute;
+    left: calc(50% - 25px);
+    top: calc(50% - 25px);
+    line-height: 0px;
+    position: fixed;
+}
+#game {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden; /* Another Safari-specific "trick" */
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    border: none;
+}
+#win-screen {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    display: none;
+    background: rgba(173, 216, 230, 0.25);
+    backdrop-filter: blur(5px);
+    flex-direction: column;
+    z-index: 6;
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div id = "jumps">
+        <svg>
+            <path d = "M 0 10 L 10 0 L 20 10 M 10 0 L 10 17 M 0 20 L 20 20" stroke="red" fill="none" stroke-width="3"></path>
+        </svg> <span id = "numberOfJumps">0</span>
+    </div>
+    <div id = "air-jumps">
+        <svg>
+            <path stroke="blue" fill="none" stroke-width="3" d="M 0 10 L 10 0 L 20 10 M 10 0 L 10 20 M 0 20 L 10 10 L 20 20"></path>
+        </svg>
+        <span id = "numberOfAirJumps">0</span>
+    </div>
+    <div id = "stars">
+        ★ <span id="numberOfStars">0</span>
+    </div>
+    <div id = "gameHolder">
+        <canvas id="game"></canvas>
+        <div id="player"></div>
+    </div>
+    <div id="win-screen">
+        <h1>You Win!</h1>
+        <br>
+        <h2>You Completed One Jump To Freedom!</h2>
+    </div>
+</body>
+</html>
