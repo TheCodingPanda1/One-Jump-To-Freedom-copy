@@ -14,7 +14,7 @@ var gravity = 1.5;
 var r = "red";
 var airjumpable = true;
 var keys = [];
-var level = 3;
+var level = 0;
 var onblock = false;
 var blocks = [];
 var spawnX;
