@@ -1,6 +1,9 @@
 :root {
     --x: 0px;
     --y: 0px;
+    --playerHeight: 50px;
+    --nonPxPlayerHeight: 50;
+    --playerTransition: width 0.1s cubic-bezier(0.42, 0, 0.46, 2.29), height 0.1s cubic-bezier(0.42, 0, 0.46, 2.29), left 0.1s cubic-bezier(0.42, 0, 0.46, 2.29);
 }
 .button {
     appearance: none;
@@ -99,15 +102,19 @@ p {
     -webkit-user-select: none;
 }
 #player {
-    width: 50px;
-    height: 50px;
+    --playerWidth: calc(2500px / var(--nonPxPlayerHeight));
+    width: var(--playerWidth);
+    height: var(--playerHeight);
     background: url(player.png);
-    position: absolute;
-    left: calc(50% - 25px);
-    top: calc(50% - 25px);
-    line-height: 0px;
     position: fixed;
+    left: calc(50% - var(--playerWidth) / 2);
+    top: calc(50% - var(--playerHeight) / 2);
     transform-origin: center bottom;
+    z-index: 2;
+    background-repeat: no-repeat;
+    background-size: 100% 100%; 
+    transition: var(--playerTransition);
+    transform: translateY(calc((50px - var(--playerHeight)) / 2));
 }
 #game {
     will-change: transform;
@@ -118,6 +125,7 @@ p {
     top: 0px;
     border: none;
     transform: translate(var(--x), var(--y));
+    z-index: 1;
 }
 #win-screen {
     position: absolute;
@@ -135,13 +143,13 @@ p {
 }
 @keyframes jump {
     0% {
-        transform: scaleY(1);
+        transform: scale(1, 1);
     }
     50% {
-        transform: scaleY(1.25);
+        transform: scale(1.25);
     }
     100% {
-        transform: scaleY(1);
+        transform: scale(1, 1);
     }
 }
 @keyframes collapse {
@@ -181,22 +189,52 @@ p {
         opacity: 0;
     }
 }
-#fallingPlatform {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    z-index: 4;
-    display: none;
-    translate: var(--x) var(--y);
-
-}
 @keyframes death {
     from {
-        transform: translateY(0px) scale(1 1);
+        transform: translateY(0px);
         opacity: 1;
     }
     to {
-        transform: translateY(500px) scale(1 0.2);
         opacity: 0;
     }
+}
+@keyframes collect {
+    0% {
+        transform: translateY(0px) scale(1, 1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(1.5, 1.5);
+        opacity: 0;
+    }
+}
+@keyframes collectStar {
+    0% {
+        transform: scale(1, 1) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(3, 3);
+        opacity: 0;
+    }
+}
+
+.background {
+    background-repeat: repeat;
+    position: absolute;
+    z-index: 0;
+    bottom: 0px;
+    opacity: 0.25;
+    height: 1600px;
+}
+#getJump, #getAirJump, #fallingPlatform, #getStar {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    z-index: 4;
+    display: none;
+    translate: var(--x) var(--y);
+}
+#grass-background {
+    background-image: url(../Grass-Background.png);
 }
