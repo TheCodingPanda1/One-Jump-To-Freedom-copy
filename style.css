@@ -1,9 +1,11 @@
 :root {
-    --x: 0px;
-    --y: 0px;
+    --playerOffsetX: 0px;
+    --playerOffsetY: 0px;
+    --screenX: 0px;
+    --screenY: 0px;
     --playerHeight: 50px;
     --nonPxPlayerHeight: 50;
-    --playerTransition: width 0.1s cubic-bezier(0.42, 0, 0.46, 2.29), height 0.1s cubic-bezier(0.42, 0, 0.46, 2.29), left 0.1s cubic-bezier(0.42, 0, 0.46, 2.29);
+    --playerTransition:
 }
 .button {
     appearance: none;
@@ -20,10 +22,10 @@
     margin-top: 100px;
     border-radius: 20px;
 }
-.button:nth-of-type(1){
+.button:nth-of-type(1) {
     top: 150px;
 }
-.button:nth-of-type(2){
+.button:nth-of-type(2) {
     top: 300px;
 }
 .button:hover {
@@ -105,16 +107,22 @@ p {
     --playerWidth: calc(2500px / var(--nonPxPlayerHeight));
     width: var(--playerWidth);
     height: var(--playerHeight);
-    background: url(player.png);
+    background: url(images/player.png);
     position: fixed;
     left: calc(50% - var(--playerWidth) / 2);
     top: calc(50% - var(--playerHeight) / 2);
-    transform-origin: center bottom;
+    transform-origin: center center;
     z-index: 2;
     background-repeat: no-repeat;
-    background-size: 100% 100%; 
+    background-size: 100% 100%;
     transition: var(--playerTransition);
     transform: translateY(calc((50px - var(--playerHeight)) / 2));
+    will-change: height, width, left, translate;
+    translate: var(--playerOffsetX) var(--playerOffsetY);
+}
+#player.upsideDown {
+    transform: translateY(calc(0px - (50px - var(--playerHeight)) / 2))
+        scaleY(-1);
 }
 #game {
     will-change: transform;
@@ -124,7 +132,7 @@ p {
     left: 0px;
     top: 0px;
     border: none;
-    transform: translate(var(--x), var(--y));
+    transform: translate(var(--screenX), var(--screenY));
     z-index: 1;
 }
 #win-screen {
@@ -218,6 +226,16 @@ p {
         opacity: 0;
     }
 }
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-25px);
+    }
+}
 
 .background {
     background-repeat: repeat;
@@ -227,14 +245,28 @@ p {
     opacity: 0.25;
     height: 1600px;
 }
-#getJump, #getAirJump, #fallingPlatform, #getStar {
+.trail {
+    width: 10px;
+    height: 10px;
+    
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background: rgb(182, 95, 38);
+    animation: fadeOut 1s;
+}
+#getJump,
+#getAirJump,
+#fallingPlatform,
+#getStar,
+#getGravitySwap {
     width: 50px;
     height: 50px;
     position: absolute;
     z-index: 4;
     display: none;
-    translate: var(--x) var(--y);
+    translate: var(--screenX) var(--screenY);
 }
 #grass-background {
-    background-image: url(./Grass-Background.png);
+    background-image: url(./images/Grass-Background.png);
 }
